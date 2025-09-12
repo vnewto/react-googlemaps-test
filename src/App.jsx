@@ -1,7 +1,9 @@
 import "./App.css";
-import { APIProvider, Map } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
+import CreateCenterControl from "./features/map";
 
 function App() {
+
   return (
     <>
       <APIProvider
@@ -24,7 +26,9 @@ function App() {
           }
           onClick={(e) => console.log("current coordinates ", e.detail.latLng)}
           reuseMaps={true} // allows map instance caching
-        ></Map>
+        >
+          <CreateCenterControl map={map} />
+        </Map>
       </APIProvider>
     </>
   );
