@@ -2,7 +2,6 @@ import "./App.css";
 import {
   APIProvider,
   Map,
-  MapCameraChangedEvent,
 } from "@vis.gl/react-google-maps";
 
 function App() {
@@ -13,6 +12,19 @@ function App() {
         onLoad={() => console.log("Maps API has loaded.")}
       >
         <h1>Hello, world!</h1>
+        <Map
+          style={{ width: '100%', height: '400px' }}
+          defaultZoom={16}
+          defaultCenter={{ lat: -33.83541999632124, lng: 148.68039995561773 }}
+          onCameraChanged={(event) =>
+            console.log(
+              "camera changed:",
+              event.detail.center,
+              "zoom:",
+              event.detail.zoom
+            )
+          }
+        ></Map>
       </APIProvider>
     </>
   );
