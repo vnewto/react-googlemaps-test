@@ -1,35 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import { APIProvider, Map } from "@vis.gl/react-google-maps";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <APIProvider
+        apiKey={import.meta.env.VITE_GOOGLEMAPS_API_KEY}
+        onLoad={() => console.log("Maps API has loaded.")}
+      >
+        <h1>Hello, world! Here is a map</h1>
+        <Map
+          style={{ width: "100%", height: "500px" }} // renders as width and height are 0 if not specified
+          defaultZoom={16}
+          region="US"
+          defaultCenter={{ lat: -33.83541999632124, lng: 148.68039995561773 }}
+          onCameraChanged={(event) =>
+            console.log(
+              "camera changed:",
+              event.detail.center,
+              "zoom:",
+              event.detail.zoom
+            )
+          }
+          onClick={(e) => console.log("current coordinates ", e.detail.latLng)}
+          reuseMaps={true} // allows map instance caching
+        ></Map>
+      </APIProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
