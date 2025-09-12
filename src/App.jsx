@@ -1,21 +1,30 @@
 import "./App.css";
-import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
+import {
+  APIProvider,
+  Map,
+  useMap,
+  AdvancedMarker,
+  Marker,
+} from "@vis.gl/react-google-maps";
+import { useState, useRef, useEffect } from "react";
 import CreateCenterControl from "./features/map";
 
 function App() {
+  const testMarker = {
+    lat: 42.393800907995406,
+    lng: -71.22784677141598,
+  };
 
   return (
-    <>
+    <div style={{ height: "100vh", width: "100vw" }}>
       <APIProvider
         apiKey={import.meta.env.VITE_GOOGLEMAPS_API_KEY}
         onLoad={() => console.log("Maps API has loaded.")}
       >
-        <h1>Hello, world! Here is a map</h1>
         <Map
-          style={{ width: "100%", height: "500px" }} // renders as width and height are 0 if not specified
-          defaultZoom={16}
+          defaultZoom={13}
           region="US"
-          defaultCenter={{ lat: -33.83541999632124, lng: 148.68039995561773 }}
+          defaultCenter={{ lat: 42.393800907995406, lng: -71.22784677141598 }}
           onCameraChanged={(event) =>
             console.log(
               "camera changed:",
@@ -26,11 +35,14 @@ function App() {
           }
           onClick={(e) => console.log("current coordinates ", e.detail.latLng)}
           reuseMaps={true} // allows map instance caching
+          mapId={import.meta.env.VITE_GOOGLEMAPS_MAP_ID}
         >
-          <CreateCenterControl map={map} />
+          <AdvancedMarker position={testMarker} key={testMarker}>
+            <span style={{ fontSize: "2rem" }}>☂️</span>
+          </AdvancedMarker>
         </Map>
       </APIProvider>
-    </>
+    </div>
   );
 }
 

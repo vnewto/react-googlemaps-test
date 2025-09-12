@@ -1,12 +1,12 @@
-import { useMap } from '@vis.gl/react-google-maps';
+import { useMap } from "@vis.gl/react-google-maps";
 
 export default function CreateCenterControl(map) {
-  const chicago = {lat: 41.850, lng: -87.650};
-  const map = useMap();
+  const chicago = { lat: 41.85, lng: -87.65 };
+  const mapBox = useMap();
 
   const handleCenterClick = () => {
-    if (map) {
-      map.setCenter(chicago);
+    if (mapBox) {
+      mapBox.setCenter(chicago);
     }
   };
 
@@ -25,7 +25,7 @@ export default function CreateCenterControl(map) {
         lineHeight: "38px",
         margin: "8px 0 22px",
         padding: "0 5px",
-        textAlign: "center"
+        textAlign: "center",
       }}
       title="Click to recenter the map"
     >
