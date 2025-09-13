@@ -90,10 +90,15 @@ function App() {
           })}
           {/* if selectedMarker isn't empty, show the info window */}
           {selectedMarker && (
-            <InfoWindow position={selectedMarker.location}>
+            <InfoWindow
+              position={selectedMarker.location}
+              options={{
+                pixelOffset: new window.google.maps.Size(0, -35),
+              }}
+            >
               <h1>{selectedMarker.name}</h1>
               <p>{selectedMarker.randomWord}</p>
-
+              
               <button onClick={() => setSelectedMarker("")}>Close</button>
             </InfoWindow>
           )}
