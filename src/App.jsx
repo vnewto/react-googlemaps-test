@@ -7,7 +7,7 @@ import {
   Marker,
   InfoWindow,
 } from "@vis.gl/react-google-maps";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import CreateCenterControl from "./features/map";
 
 function App() {
@@ -47,6 +47,8 @@ function App() {
   // set Usestate for whether a marker has been clicked on (to display info window)
   const [selectedMarker, setSelectedMarker] = useState("");
 
+  const closeInfoWindow = useCallback(() => setSelectedMarker(""), []);
+
   return (
     <div style={{ height: "100vh", width: "100vw" }}>
       <h1>GoogleMaps API Integration</h1>
@@ -80,6 +82,7 @@ function App() {
                   position={marker.location}
                   // add onClick event listener for when a user clicks on a marker
                   onClick={() => {
+                    closeInfoWindow;
                     setSelectedMarker(marker);
                   }}
                 >
@@ -95,11 +98,13 @@ function App() {
               options={{
                 pixelOffset: new window.google.maps.Size(0, -35),
               }}
+              onClose={closeInfoWindow}
+              onCloseClick={closeInfoWindow}
             >
               <h1>{selectedMarker.name}</h1>
               <p>{selectedMarker.randomWord}</p>
-              
-              <button onClick={() => setSelectedMarker("")}>Close</button>
+
+              <button onClick={closeInfoWindow}>Close</button>
             </InfoWindow>
           )}
         </Map>
