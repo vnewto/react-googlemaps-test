@@ -9,8 +9,42 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useState, useRef, useEffect, useCallback } from "react";
 import CreateCenterControl from "./features/map";
+import FilteredList from "./features/filteredList";
 
 function App() {
+  // url and token for fetch request from airtable
+  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${
+    import.meta.env.VITE_TABLE_NAME
+  }`;
+  const token = `Bearer ${import.meta.env.VITE_PAT}`;
+
+  useEffect(() => {
+    const fetchMapData = async () => {
+      const options = {
+        method: "GET",
+        headers: { Authorization: token },
+      };
+      try {
+        const resp = await fetch(url, options);
+        console.log("Response status: ", resp.status);
+        if (!resp.ok) {
+          const errorText = await resp.text();
+          console.log("Error response body:", errorText);
+          throw new Error(`HTTP ${resp.status}: ${errorText}`);
+        }
+
+        const data = await resp.json();
+        if (data.status != "success") {
+          throw new Error(data.status);
+        }
+        console.log(data);
+      } catch (error) {
+        console.log("Fetch error: ", error.message);
+      }
+    };
+    fetchMapData();
+  }, [token, url]);
+
   const testMarker = {
     name: "test point 1",
     lat: 42.393800907995406,
@@ -109,6 +143,7 @@ function App() {
           )}
         </Map>
       </APIProvider>
+      <FilteredList />
     </div>
   );
 }
