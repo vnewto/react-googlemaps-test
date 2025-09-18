@@ -2,14 +2,58 @@ import "./App.css";
 import {
   APIProvider,
   Map,
-  useMap,
   AdvancedMarker,
-  Marker,
   InfoWindow,
 } from "@vis.gl/react-google-maps";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CreateCenterControl from "./features/map";
-import FilteredList from "./features/filteredList";
+import ProjectsList from "./features/projectsList";
+
+// call function to parse data from object received from airtable
+function parseData(data) {
+  //create empty variable to store new data
+  const result = [];
+  //map over data.records
+  const records = data.records;
+  //for each record:
+  records.forEach((record) => {
+    //create new empty object
+    const object = {};
+    //pull id
+    object.id = record.id;
+    //within fields:
+    const fields = record.fields;
+    //pull name
+    object.name = fields.name;
+    //make empty location object with lat & lng inside
+    const location = {
+      //put lat and long together inside a location object
+      lat: fields.lat,
+      lng: fields.lng,
+    };
+    //put location object inside object
+    object.location = location;
+    //pull project_lead
+    object.project_lead = fields.project_lead;
+    //pull project status
+    object.project_status = fields.project_status;
+    //access attachments
+    const attachments = fields.attachments;
+    console.log("attachments: ", attachments);
+    // const attachments_0 = attachments[0];
+    // //access url inside attachments
+    // console.log("attachments_0: ", attachments_0);
+    // const img_url = attachments_0.url;
+    // console.log("img_url: ", img_url);
+    // object.img_url = img_url;
+
+    //push object into result variable
+    result.push(object);
+  });
+  //check if result formatted properly
+  console.log("result: ", result);
+  return result;
+}
 
 function App() {
   // url and token for fetch request from airtable
@@ -17,6 +61,8 @@ function App() {
     import.meta.env.VITE_TABLE_NAME
   }`;
   const token = `Bearer ${import.meta.env.VITE_PAT}`;
+
+  const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
     const fetchMapData = async () => {
@@ -32,51 +78,20 @@ function App() {
           console.log("Error response body:", errorText);
           throw new Error(`HTTP ${resp.status}: ${errorText}`);
         }
-
         const data = await resp.json();
-        if (data.status != "success") {
-          throw new Error(data.status);
-        }
-        console.log(data);
+        console.log("data: ", data);
+
+        // call function to parse data from object received from airtable
+        const parsedData = parseData(data);
+        console.log("parsedData: ", parsedData);
+
+        setMarkers(parsedData);
       } catch (error) {
-        console.log("Fetch error: ", error.message);
+        console.error("Fetch error: ", error);
       }
     };
     fetchMapData();
   }, [token, url]);
-
-  const testMarker = {
-    name: "test point 1",
-    lat: 42.393800907995406,
-    lng: -71.22784677141598,
-  };
-
-  const testMarkers = [
-    {
-      name: "testMarkers1",
-      randomWord: "yelp",
-      location: {
-        lat: 42.38782221947883,
-        lng: -71.23670789679711,
-      },
-    },
-    {
-      name: "testMarkers2",
-      randomWord: "snipe",
-      location: {
-        lat: 42.405697803295766,
-        lng: -71.24311923980713,
-      },
-    },
-    {
-      name: "testMarkers3",
-      randomWord: "magenta",
-      location: {
-        lat: 42.36863938831473,
-        lng: -71.25199387199015,
-      },
-    },
-  ];
 
   // set Usestate for whether a marker has been clicked on (to display info window)
   const [selectedMarker, setSelectedMarker] = useState("");
@@ -91,27 +106,24 @@ function App() {
         onLoad={() => console.log("Maps API has loaded.")}
       >
         <Map
-          defaultZoom={13}
+          defaultZoom={4}
           region="US"
           defaultCenter={{ lat: 42.393800907995406, lng: -71.22784677141598 }}
-          onCameraChanged={(event) =>
-            console.log(
-              "camera changed:",
-              event.detail.center,
-              "zoom:",
-              event.detail.zoom
-            )
-          }
+          // onCameraChanged={(event) =>
+          //   console.log(
+          //     "camera changed:",
+          //     event.detail.center,
+          //     "zoom:",
+          //     event.detail.zoom
+          //   )
+          // }
           onClick={(e) => console.log("current coordinates ", e.detail.latLng)}
           reuseMaps={true} // allows map instance caching
           mapId={import.meta.env.VITE_GOOGLEMAPS_MAP_ID}
         >
-          <AdvancedMarker position={testMarker} key={testMarker}>
-            <span style={{ fontSize: "2rem" }}>☂️</span>
-          </AdvancedMarker>
-          {testMarkers.map((marker) => {
+          {markers.map((marker) => {
             return (
-              <div key={marker.name}>
+              <div key={marker.id}>
                 <AdvancedMarker
                   position={marker.location}
                   // add onClick event listener for when a user clicks on a marker
@@ -135,15 +147,25 @@ function App() {
               onClose={closeInfoWindow}
               onCloseClick={closeInfoWindow}
             >
-              <h1>{selectedMarker.name}</h1>
-              <p>{selectedMarker.randomWord}</p>
+              <h2>{selectedMarker.name}</h2>
+              <p>{`Project Lead: ${selectedMarker.project_lead}`}</p>
+              <p>{`Project Status: ${selectedMarker.project_status}`}</p>
+              <div>
+                <img
+                  src="https://v5.airtableusercontent.com/v3/u/45/45/1758232800000/E6g8AU05SiD7njMPiQurJA/_9IeASjJEnHZj7D3mpaTwuwAJhbOMr-niZJywsZgKeXtmNa1Bw3TzsEs7kR8m40mt11W-bQC3rFvjeQgSCb_PtS4bsTH6pW_J96iSwFfGLblCyamM-oIFnG71DPFYjiA-OZXjv2LRSWbg5Wnhp-37nXhTCpZZ4YpMAeMTPKRfwY/mB6heBdglhDCGMpC5-VNLeM2z0JTo-SHrxWmnDy4dss"
+                  style={{
+                    height: "100px",
+                    width: "180px",
+                  }}
+                />
+              </div>
 
               <button onClick={closeInfoWindow}>Close</button>
             </InfoWindow>
           )}
         </Map>
       </APIProvider>
-      <FilteredList />
+      <ProjectsList markers={markers}/>
     </div>
   );
 }
